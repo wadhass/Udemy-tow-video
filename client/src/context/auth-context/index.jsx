@@ -9,6 +9,8 @@ export default function AuthProvider({ children }) {
   const [signInFormData, setSignInFormData] = useState(initialSignInFormData);
   const [signUpFormData, setSignUpFormData] = useState(initialSignUpFormData);
   const [registerError, setRegisterError] = useState("");
+  const [emailAlreadyRegistered, setEmailAlreadyRegistered] = useState(false);
+  const [loginError, setLoginError] = useState("");
   const [auth, setAuth] = useState({
     authenticate: false,
     user: null,
@@ -18,6 +20,7 @@ export default function AuthProvider({ children }) {
   async function handleRegisterUser(event) {
     event.preventDefault();
     setRegisterError("");
+    setEmailAlreadyRegistered(false);
 
     try {
       const data = await registerService(signUpFormData);
@@ -26,14 +29,18 @@ export default function AuthProvider({ children }) {
         setSignUpFormData(initialSignUpFormData);
       }
     } catch (error) {
+      const isExistingEmail =
+        error?.response?.data?.code === "EMAIL_ALREADY_EXISTS";
       setRegisterError(
         error?.response?.data?.message || "Registration failed. Please try again."
       );
+      setEmailAlreadyRegistered(isExistingEmail);
     }
   }
 
   async function handleLoginUser(event) {
     event.preventDefault();
+    setLoginError("");
 
     try {
       const data = await loginService(signInFormData);
@@ -52,9 +59,10 @@ export default function AuthProvider({ children }) {
           authenticate: false,
           user: null,
         });
+        setLoginError("Unable to sign in. Please check your email and password.");
       }
     } catch (error) {
-      console.error(
+      setLoginError(
         error?.response?.data?.message || "Login failed. Please try again."
       );
       setAuth({
@@ -105,8 +113,6 @@ export default function AuthProvider({ children }) {
     checkAuthUser();
   }, []);
 
-  console.log(auth, "gf");
-
   return (
     <AuthContext.Provider
       value={{
@@ -115,6 +121,9 @@ export default function AuthProvider({ children }) {
         signUpFormData,
         setSignUpFormData,
         registerError,
+        emailAlreadyRegistered,
+        loginError,
+        setLoginError,
         handleRegisterUser,
         handleLoginUser,
         auth,

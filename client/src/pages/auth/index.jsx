@@ -12,6 +12,7 @@ import { AuthContext } from "@/context/auth-context";
 import { GraduationCap } from "lucide-react";
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 function AuthPage() {
   const [activeTab, setActiveTab] = useState("signin");
@@ -21,12 +22,24 @@ function AuthPage() {
     signUpFormData,
     setSignUpFormData,
     registerError,
+    emailAlreadyRegistered,
+    loginError,
+    setLoginError,
     handleRegisterUser,
     handleLoginUser,
   } = useContext(AuthContext);
 
   function handleTabChange(value) {
     setActiveTab(value);
+  }
+
+  function handleSignInInstead() {
+    setSignInFormData({
+      userEmail: signUpFormData.userEmail.trim(),
+      password: "",
+    });
+    setLoginError("");
+    setActiveTab("signin");
   }
 
   function checkIfSignInFormIsValid() {
@@ -45,8 +58,6 @@ function AuthPage() {
       signUpFormData.password !== ""
     );
   }
-
-  console.log(signInFormData);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -76,9 +87,9 @@ function AuthPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
-                {registerError ? (
+                {loginError ? (
                   <p role="alert" className="text-sm text-destructive">
-                    {registerError}
+                    {loginError}
                   </p>
                 ) : null}
                 <CommonForm
@@ -101,6 +112,21 @@ function AuthPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
+                {registerError ? (
+                  <div role="alert" className="space-y-2">
+                    <p className="text-sm text-destructive">{registerError}</p>
+                    {emailAlreadyRegistered ? (
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="h-auto p-0"
+                        onClick={handleSignInInstead}
+                      >
+                        Sign in with this email
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : null}
                 <CommonForm
                   formControls={signUpFormControls}
                   buttonText={"Sign Up"}

@@ -5,7 +5,14 @@ const jwt = require("jsonwebtoken");
 const registerUser = async (req, res) => {
   const { userName, userEmail, password } = req.body || {};
 
-  if (!userName || !userEmail || !password) {
+  if (
+    typeof userName !== "string" ||
+    typeof userEmail !== "string" ||
+    typeof password !== "string" ||
+    !userName.trim() ||
+    !userEmail.trim() ||
+    !password
+  ) {
     return res.status(400).json({
       success: false,
       message: "User name, email, and password are required",
@@ -15,15 +22,19 @@ const registerUser = async (req, res) => {
   const cleanedUserName = userName.trim();
   const cleanedUserEmail = userEmail.trim().toLowerCase();
 
-  const existingUser = await User.findOne({
-    $or: [{ userEmail: cleanedUserEmail }, { userName: cleanedUserName }],
-  });
-
-  if (existingUser) {
+  if (await User.findOne({ userEmail: cleanedUserEmail })) {
     return res.status(409).json({
       success: false,
-      message:
-        "An account with this email or username already exists. Sign in or use different details.",
+      code: "EMAIL_ALREADY_EXISTS",
+      message: "An account with this email already exists. Sign in instead.",
+    });
+  }
+
+  if (await User.findOne({ userName: cleanedUserName })) {
+    return res.status(409).json({
+      success: false,
+      code: "USERNAME_ALREADY_EXISTS",
+      message: "This username is already taken. Choose a different username.",
     });
   }
 
@@ -44,9 +55,23 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  const { userEmail, password } = req.body;
+  const { userEmail, password } = req.body || {};
 
-  const checkUser = await User.findOne({ userEmail });
+  if (
+    typeof userEmail !== "string" ||
+    typeof password !== "string" ||
+    !userEmail.trim() ||
+    !password
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Email and password are required",
+    });
+  }
+
+  const checkUser = await User.findOne({
+    userEmail: userEmail.trim().toLowerCase(),
+  });
 
   if (!checkUser || !(await bcrypt.compare(password, checkUser.password))) {
     return res.status(401).json({

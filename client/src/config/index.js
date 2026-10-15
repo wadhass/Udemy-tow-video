@@ -70,6 +70,16 @@ export const courseLevelOptions = [
 ];
 
 export const courseCategories = [
+  { id: "javascript", label: "JavaScript" },
+  { id: "python", label: "Python" },
+  { id: "java", label: "Java" },
+  { id: "cpp", label: "C++" },
+  { id: "csharp", label: "C#" },
+  { id: "html", label: "HTML" },
+  { id: "css", label: "CSS" },
+  { id: "tailwind-css", label: "Tailwind CSS" },
+  { id: "nodejs", label: "Node.js" },
+  { id: "express-js", label: "Express.js" },
   { id: "web-development", label: "Web Development" },
   { id: "backend-development", label: "Backend Development" },
   { id: "data-science", label: "Data Science" },
